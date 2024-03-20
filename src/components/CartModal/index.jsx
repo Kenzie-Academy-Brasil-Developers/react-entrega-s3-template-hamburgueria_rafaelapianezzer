@@ -1,32 +1,73 @@
 import { MdClose } from "react-icons/md";
 import { CartItemCard } from "./CartItemCard";
+import styles from "../CartModal/styles.module.scss"
+import { useOutClick } from "../hooks/useOutClick";
+import { useKeydown } from "../hooks/useKeydown";
 
-export const CartModal = ({ cartList }) => {
+export const CartModal = ({ cartList, setCartList, setIsOpen}) => {
+ 
+   const modalRef = useOutClick(() => {
+      setIsOpen(false);
+   });
+
+   const buttonRef = useKeydown("Escape", (element) => {
+      element.click()
+   })
+
+   
    const total = cartList.reduce((prevValue, product) => {
       return prevValue + product.price;
    }, 0);
 
+   const increaseProductCount=(product)=>{
+      const existingProductIndex = cartList.findIndex((item) => item.id === product.id);
+      const updatedProductList = [...cartList];
+      updatedProductList[existingProductIndex].quantity++;
+      setCartList(updatedProductList);
+   }
+
+   const decreaseProductCount=(product)=>{
+      const existingProductIndex = cartList.findIndex((item) => item.id === product.id);
+      const updatedProductList = [...cartList];
+      updatedProductList[existingProductIndex].quantity--;
+      if(updatedProductList[existingProductIndex].quantity <= 0){
+         removeProduct(product)
+      } else
+      setCartList(updatedProductList);
+   }
+
+   const removeProduct = (product) => {
+      const updatedCartList = cartList.filter( p => p !== product);
+      setCartList(updatedCartList);
+  };
+
+  const removeAllProducts = () => {
+   setCartList([]); 
+ };
+
    return (
-      <div role="dialog">
-         <div>
-            <h2>Carrinho de compras</h2>
-            <button aria-label="close" title="Fechar">
-               <MdClose size={21} />
-            </button>
-         </div>
-         <div>
-            <ul>
-               {cartList.map((product) => (
-                  <CartItemCard key={product.id} product={product} />
-               ))}
-            </ul>
-         </div>
-         <div>
-            <div>
-               <span>Total</span>
-               <span>{total.toLocaleString('pt-BR', { style: "currency", currency: "BRL"})}</span>
+      <div role="dialog" className={styles.modalOverlay}>
+         <div className={styles.modalBox} ref={modalRef}>
+            <div className={styles.headerModal}>
+               <h2 className="heading3">Carrinho de compras</h2>
+               <button ref={buttonRef} onClick={() => setIsOpen(false)} aria-label="close" title="Fechar">
+                  <MdClose size={21} />
+               </button>
             </div>
-            <button>Remover todos</button>
+            <div className={styles.contentModal}>
+               <ul>
+                  {cartList.map((product) => (
+                     <CartItemCard decreaseProductCount={decreaseProductCount} removeProduct={removeProduct} increaseProductCount={increaseProductCount} key={product.id} product={product} />
+                  ))}
+               </ul>
+            </div>
+            <div className={styles.contentFooter}>
+            <div  className={styles.modalFooter}>
+                  <span className={styles['body-600']}>Total </span>
+                  <span className={`${'body-600'} ${styles.price}`}>{total.toLocaleString('pt-BR', { style: "currency", currency: "BRL"})}</span>
+                  </div>
+                <button className={`${styles.buttonModal} headline`} onClick={removeAllProducts}>Remover todos</button>
+            </div>
          </div>
       </div>
    );

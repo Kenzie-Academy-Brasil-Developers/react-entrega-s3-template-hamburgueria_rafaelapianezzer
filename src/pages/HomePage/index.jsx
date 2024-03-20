@@ -1,26 +1,38 @@
-import { useState } from "react";
-import { CartModal } from "../../components/CartModal";
+import { useState, useEffect } from "react";
 import { Header } from "../../components/Header";
 import { ProductList } from "../../components/ProductList";
+import { api } from "../../services/api";
+import { CartModal } from "../../components/CartModal";
 
 export const HomePage = () => {
    const [productList, setProductList] = useState([]);
    const [cartList, setCartList] = useState([]);
+   const [isOpen, setIsOpen] = useState(false);
 
-   // useEffect montagem - carrega os produtos da API e joga em productList
-   // useEffect atualização - salva os produtos no localStorage (carregar no estado)
-   // adição, exclusão, e exclusão geral do carrinho
-   // renderizações condições e o estado para exibir ou não o carrinho
-   // filtro de busca
-   // estilizar tudo com sass de forma responsiva
+   useEffect(() => {
+      const getProducts = async () => {
+         const { data } = await api.get("products");
+         setProductList(data);
+      };
+      getProducts();
+
+      const storedCartList = JSON.parse(localStorage.getItem("@cart")) || [];
+      setCartList(storedCartList);
+   }, []);
+
+
+   useEffect(() => {
+      if (cartList.length > 0) localStorage.setItem("@cart", JSON.stringify(cartList));
+   }, [cartList]);
 
    return (
       <>
-         <Header />
-         <main>
-            <ProductList productList={productList} />
-            <CartModal cartList={cartList} />
-         </main>
+         <Header  cartList={cartList} setIsOpen={setIsOpen} />
+         <ProductList productList={productList} setCartList={setCartList} cartList={cartList}/>
+         {
+            isOpen && 
+               <CartModal setCartList={setCartList} setIsOpen={setIsOpen} cartList={cartList} />
+         }
       </>
    );
 };

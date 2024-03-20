@@ -1,0 +1,36 @@
+.colorHeader{
+    background-color: var(--grey-0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 2rem;
+    width: 1024px;
+    
+
+    form{
+        display: none;
+    }
+
+    button{
+        color: #BDBDBD;
+        position: relative;
+    }
+
+    span{
+        border-radius: 5px;
+        background-color: var(--color-primary);
+        color: var(--grey-0);
+        position: absolute;
+        top: -12px;
+        right: 2px;
+        padding: 2px 4px;
+    }
+
+}
+
